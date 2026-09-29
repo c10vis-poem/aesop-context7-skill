@@ -1,4 +1,6 @@
 ---
+# SPDX-License-Identifier: CC-BY-SA-4.0
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 name: context7
 description: "Use when looking up library documentation, API references, framework patterns, or code examples for ANY library (React, Next.js, Vue, Django, Laravel, etc.) and the Context7 MCP server is unavailable or not configured. Fetches the same current docs directly via the Context7 REST API as a fallback. Triggers on: how to use library, API docs, framework pattern, import usage, library example."
 license: "(MIT AND CC-BY-SA-4.0)"
@@ -88,4 +90,4 @@ export CONTEXT7_API_KEY="your-api-key"
 
 ---
 
-> **Contributing:** https://github.com/netresearch/context7-skill
+> **Contributing:** <https://github.com/netresearch/context7-skill>

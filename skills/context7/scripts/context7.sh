@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: Netresearch DTT GmbH
 # Context7 REST API wrapper
 # Based on @upstash/context7-mcp source
 # Usage: context7.sh <command> [args...]
