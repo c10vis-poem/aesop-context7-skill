@@ -16,7 +16,8 @@
 ├── .github/workflows/             # CI: lint, tests, security, release, auto-merge-deps, harness-verify
 ├── composer.json                  # Composer package (ai-agent-skill type)
 ├── docs/                          # Architecture and execution plans
-│   └── ARCHITECTURE.md
+│   ├── ARCHITECTURE.md
+│   └── SECURITY-ASSURANCE.md
 └── scripts/                       # Repo-level scripts (verify-harness.sh)
 ```
 
@@ -43,4 +44,5 @@ No Makefile or npm scripts. Key commands:
 - [skills/context7/SKILL.md](skills/context7/SKILL.md) — skill definition, triggers, workflow
 - [skills/context7/scripts/context7.sh](skills/context7/scripts/context7.sh) — REST API wrapper script
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — architecture overview
+- [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md) — security assurance case: threats, trust boundaries, limits
 - [README.md](README.md) — installation, usage, comparison with MCP
