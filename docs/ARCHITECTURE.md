@@ -29,7 +29,7 @@ The Context7 Skill provides AI agents with on-demand access to current library d
        ▼       ▼
 ┌──────────────────────┐
 │  Context7 REST API   │
-│  (api.context7.com)  │
+│  (context7.com/api)  │
 └──────────────────────┘
 ```
 
@@ -46,7 +46,7 @@ Bash wrapper around the Context7 REST API with two subcommands:
 ## Integration Points
 
 - **AI Agent** — Reads SKILL.md, invokes context7.sh via Bash tool
-- **Context7 REST API** — `api.context7.com` provides curated documentation for 50+ libraries
+- **Context7 REST API** — `https://context7.com/api/v2` (`BASE_URL` in `context7.sh`) provides curated documentation for 50+ libraries
 - **Composer** — Installable as a PHP package via `netresearch/composer-agent-skill-plugin`
 
 ## Data Flow
