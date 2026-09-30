@@ -1,3 +1,6 @@
+<!-- SPDX-License-Identifier: CC-BY-SA-4.0 -->
+<!-- SPDX-FileCopyrightText: Netresearch DTT GmbH -->
+
 # Context7 Documentation Lookup Skill
 
 Fetch up-to-date library documentation via Context7 REST API. Lightweight alternative to Context7 MCP with no persistent context overhead.
@@ -142,6 +145,39 @@ Contributions welcome! Please submit PRs for:
 - Adding common library IDs
 - Improving script error handling
 - Documentation updates
+
+### Tests
+
+The behavioural tests live in `tests/` and need only bash, jq, git and python3 (`check-plugin-version.sh` reads `plugin.json` with it):
+
+```bash
+bash tests/context7.sh              # skills/context7/scripts/context7.sh
+bash tests/check-plugin-version.sh  # Build/Scripts/check-plugin-version.sh
+```
+
+- `tests/context7.sh` puts a fake `curl` first on `PATH`, so no request reaches the Context7 API. It checks the usage and argument errors, the request URL each command builds (leading slash stripped, mode in the path, query and topic percent-encoded), that the `Authorization` header is sent only when `CONTEXT7_API_KEY` is set, and how search results and API errors are printed.
+- `tests/check-plugin-version.sh` builds throwaway git repositories and checks that a semver tag at `HEAD` must match the version in `.claude-plugin/plugin.json`.
+
+Each check prints `ok` or `FAIL`; a `FAIL` line is followed by the exit code, the output and, for `context7.sh`, the arguments the fake `curl` received. A script exits 1 when any check failed. In CI, the Skill Tests workflow (`.github/workflows/tests.yml`) runs every `tests/**/*.sh` on each pull request and on pushes to `main`.
+
+A pull request that adds or changes behaviour in a shipped script adds or updates a check in `tests/` that fails without the change.
+
+## Governance and policies
+
+This repository follows the Netresearch organisation policies:
+
+- [Governance](https://github.com/netresearch/.github/blob/main/GOVERNANCE.md): ownership, roles, how decisions are made and disputes resolved, and continuity.
+- [Roadmap](https://github.com/netresearch/.github/blob/main/ROADMAP.md): planned and explicitly excluded work for the coming year.
+- [Handling of dependency and code analysis findings](https://github.com/netresearch/.github/blob/main/SECURITY.md#handling-of-dependency-and-code-analysis-findings): thresholds, deadlines and the exception process for dependency (SCA) and static analysis (SAST) findings.
+- [Secret management](https://github.com/netresearch/.github/blob/main/SECURITY.md#secret-management): how CI and release credentials are stored, accessed and rotated.
+- [Access roster](https://github.com/netresearch/.github/blob/main/docs/access-roster.md): who holds administrative access to this repository and the organisation.
+
+The security assurance case for this skill (threat model, trust boundaries, countermeasures and limits) is in [docs/SECURITY-ASSURANCE.md](docs/SECURITY-ASSURANCE.md).
+
+Checks that run on pull requests in this repository:
+
+- Every pull request: Skill Validation (`lint.yml`: skill structure, markdownlint, yamllint, actionlint, JSON syntax, ShellCheck, ruff), Eval Validation (`eval-validate.yml`) and Skill Tests (`tests.yml`).
+- Pull requests to `main`: `security.yml` with Betterleaks (secret scanning), zizmor (workflow static analysis), dependency review (fails on vulnerabilities of severity high or above), Composer Audit and Opengrep SAST (fails on findings of severity WARNING or above); Harness Verification (`harness-verify.yml`) and Template Drift (`check-template-drift.yml`).
 
 ## License
 
