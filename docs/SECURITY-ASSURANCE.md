@@ -58,5 +58,5 @@ Which of these checks must pass before a pull request can merge is set in the br
 
 - The documentation returned by Context7 is third-party content. The script neither filters nor verifies it; an agent that reads it should treat it as reference material, not as instructions.
 - The library ID is placed into the request path as given, after removing one leading slash. It is not percent-encoded, so an ID containing `?`, `#` or `..` changes which path on `context7.com` is requested. The host and scheme cannot change.
-- `curl` runs with `-s` and without `-f`: an HTTP error response is printed like a successful one, and the script exits 0. A missing `curl` or `jq`, or a network failure, makes the script exit non-zero.
+- `curl` runs with `-s` and without `-f`: an HTTP error response is printed like a successful one, and the script exits 0. A missing `curl`, a network failure, or a missing `jq` makes the script exit non-zero; `docs` without a topic does not call `jq`, so it runs without it.
 - The skill does not rate-limit or cache requests; Context7's own limits apply.
