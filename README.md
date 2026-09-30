@@ -148,7 +148,7 @@ Contributions welcome! Please submit PRs for:
 
 ### Tests
 
-The behavioural tests live in `tests/` and need only bash, jq and git:
+The behavioural tests live in `tests/` and need only bash, jq, git and python3 (`check-plugin-version.sh` reads `plugin.json` with it):
 
 ```bash
 bash tests/context7.sh              # skills/context7/scripts/context7.sh

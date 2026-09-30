@@ -11,13 +11,13 @@ This document states what a user can expect from this repository in terms of sec
 | --- | --- | --- |
 | Skill instructions for an AI agent | `skills/context7/SKILL.md` | Read by the agent as instructions; not executed |
 | REST API wrapper | `skills/context7/scripts/context7.sh` | On the user's machine, run by the agent or the user |
-| Repository checks | `Build/Scripts/check-plugin-version.sh`, `Build/hooks/pre-push`, `scripts/verify-harness.sh`, `tests/*.sh` | In this repository's CI and on contributors' machines |
+| Repository checks | `Build/Scripts/check-plugin-version.sh`, `Build/hooks/pre-push`, `scripts/verify-harness.sh`, `tests/*.sh` | On contributors' machines (the pre-push hook runs `check-plugin-version.sh`, the others are run by hand); `tests/*.sh` also in this repository's CI |
 
 The skill has no server component, stores nothing on disk, and handles no user accounts.
 
 ## Security requirements
 
-1. `context7.sh` sends requests only to `https://context7.com/api/v2`.
+1. `context7.sh` addresses every request to `https://context7.com/api/v2`.
 2. The optional `CONTEXT7_API_KEY` is read from the environment and sent only as an `Authorization` header to that host; without the variable no `Authorization` header is sent.
 3. Free-text arguments (search query, topic) cannot change the structure of the request URL.
 4. `context7.sh` writes no file and executes nothing it receives.
@@ -27,7 +27,7 @@ The skill has no server component, stores nothing on disk, and handles no user a
 
 - **Agent and skill user.** The agent reads `SKILL.md` as instructions and runs `context7.sh` with a library name, a library ID, a topic and a mode. These arguments come from the user's question and are treated as untrusted text (see the countermeasures below).
 - **Context7 API.** A third-party service operated by Upstash. `context7.sh` passes its response to the agent: search results are formatted with `jq`, documentation is printed as returned. The response is data for the agent to read; the script does not interpret or execute it.
-- **Network.** The base URL is fixed to `https` in `context7.sh` (`BASE_URL`), and `curl` is called without `-L`, so a redirect is not followed to another host or scheme.
+- **Network.** The base URL is fixed to `https` in `context7.sh` (`BASE_URL`), and `curl` is called without `-L`, so a redirect is not followed to another host or scheme unless the user's own curl configuration enables it (see below).
 - **CI.** Workflows run on GitHub-hosted runners with `permissions: {}` at the top level and the minimum job permissions each called reusable workflow needs (`.github/workflows/*.yml`).
 
 ## Threats and countermeasures
@@ -59,4 +59,5 @@ Which of these checks must pass before a pull request can merge is set in the br
 - The documentation returned by Context7 is third-party content. The script neither filters nor verifies it; an agent that reads it should treat it as reference material, not as instructions.
 - The library ID is placed into the request path as given, after removing one leading slash. It is not percent-encoded, so an ID containing `?`, `#` or `..` changes which path on `context7.com` is requested. The host and scheme cannot change.
 - `curl` runs with `-s` and without `-f`: an HTTP error response is printed like a successful one, and the script exits 0. A missing `curl`, a network failure, or a missing `jq` makes the script exit non-zero; `docs` without a topic does not call `jq`, so it runs without it.
+- `curl` reads the user's `~/.curlrc`. A `location` setting there makes it follow redirects, and `location-trusted` also sends the `Authorization` header to the redirect target; the fixed host and the key's single destination hold only without such settings.
 - The skill does not rate-limit or cache requests; Context7's own limits apply.
