@@ -42,7 +42,7 @@ The skill has no server component, stores nothing on disk, and handles no user a
 | A release is tagged with a version that disagrees with `plugin.json` | The pre-push hook runs `check-plugin-version.sh`, which fails when a semver tag at `HEAD` differs from `.claude-plugin/plugin.json` | `Build/hooks/pre-push`, `Build/Scripts/check-plugin-version.sh`; `tests/check-plugin-version.sh` |
 | A secret is committed | Betterleaks scans every push and pull request to `main` | `.github/workflows/security.yml` |
 | A vulnerable or malicious dependency is added | Dependency review fails on vulnerabilities of severity high or above in a pull request; Composer Audit checks the installed Composer dependencies against known advisories; Renovate proposes updates, including pre-commit hook revisions | `.github/workflows/security.yml`, `renovate.json` |
-| Insecure code or workflow patterns | Opengrep fails on findings of severity WARNING or above; zizmor analyses the workflows; ShellCheck runs on every `*.sh` file at severity `error` in Skill Validation | `.github/workflows/security.yml`, `.github/workflows/lint.yml` |
+| Insecure code or workflow patterns | Opengrep scans the code (failure threshold: [organisation SAST rule](https://github.com/netresearch/.github/blob/main/SECURITY.md#static-analysis-sast)); zizmor analyses the workflows; ShellCheck runs on every `*.sh` file at severity `error` in Skill Validation | `.github/workflows/security.yml`, `.github/workflows/lint.yml` |
 | A regression in the wrapper's request handling | The behavioural tests run on every pull request | `.github/workflows/tests.yml`, `tests/context7.sh` |
 
 Which of these checks must pass before a pull request can merge is set in the branch protection of `main`, not in this repository.
