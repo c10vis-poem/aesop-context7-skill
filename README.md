@@ -155,7 +155,7 @@ bash tests/context7.sh              # skills/context7/scripts/context7.sh
 bash tests/check-plugin-version.sh  # Build/Scripts/check-plugin-version.sh
 ```
 
-- `tests/context7.sh` puts a fake `curl` first on `PATH`, so no request reaches the Context7 API. It checks the usage and argument errors, the request URL each command builds (leading slash stripped, mode in the path, query and topic percent-encoded), that the `Authorization` header is sent only when `CONTEXT7_API_KEY` is set, and how search results and API errors are printed.
+- `tests/context7.sh` puts a fake `curl` first on `PATH`, so no request reaches the Context7 API. It checks the usage and argument errors, the request URL each command builds (leading slash stripped, mode in the path, query and topic percent-encoded), that the `Authorization` header is sent only when `CONTEXT7_API_KEY` is set and reaches `curl` on standard input rather than as an argument, and how search results and API errors are printed.
 - `tests/check-plugin-version.sh` builds throwaway git repositories and checks that a semver tag at `HEAD` must match the version in `.claude-plugin/plugin.json`.
 
 Each check prints `ok` or `FAIL`; a `FAIL` line is followed by the exit code, the output and, for `context7.sh`, the arguments the fake `curl` received. A script exits 1 when any check failed. In CI, the Skill Tests workflow (`.github/workflows/tests.yml`) runs every `tests/**/*.sh` on each pull request and on pushes to `main`.

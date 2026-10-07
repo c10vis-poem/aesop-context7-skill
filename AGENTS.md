@@ -36,7 +36,7 @@ No Makefile or npm scripts. Key commands:
 - Library IDs follow `/vendor/library` format (e.g., `/facebook/react`)
 - Two fetch modes: `code` (API references, default) and `info` (conceptual guides)
 - Optional `CONTEXT7_API_KEY` env var for higher rate limits
-- Dependencies: curl or fetch, jq
+- Dependencies: curl 7.55 or later, jq
 - Split license: MIT for code, CC-BY-SA-4.0 for content
 
 ## References

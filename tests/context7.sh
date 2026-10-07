@@ -22,20 +22,27 @@ trap 'rm -rf "$WORK"' EXIT
 mkdir -p "$WORK/bin"
 cat > "$WORK/bin/curl" <<'STUB'
 #!/usr/bin/env bash
-# Fake curl: one argument per line into $STUB_LOG, then the canned body.
+# Fake curl: one argument per line into $STUB_LOG, standard input into
+# $STUB_STDIN when an argument tells curl to read headers from it (`@-`),
+# then the canned body.
 printf '%s\n' "$@" >> "$STUB_LOG"
+for a in "$@"; do
+    [ "$a" = "@-" ] && cat >> "$STUB_STDIN"
+done
 [ -n "${STUB_BODY:-}" ] && printf '%s' "$STUB_BODY"
 exit 0
 STUB
 chmod +x "$WORK/bin/curl"
 
 export STUB_LOG="$WORK/curl.args"
+export STUB_STDIN="$WORK/curl.stdin"
 fail=0
 count=0
 
 # run <args...> — runs the script with the fake curl; sets OUT and RC.
 run() {
     : > "$STUB_LOG"
+    : > "$STUB_STDIN"
     OUT=$(PATH="$WORK/bin:$PATH" bash "$SCRIPT" "$@" 2>&1)
     RC=$?
 }
@@ -59,6 +66,7 @@ check() { # check <description> <command...>
 out_has() { printf '%s\n' "$OUT" | grep -qF -- "$1"; }
 arg_has() { grep -qxF -- "$1" "$STUB_LOG"; }
 arg_lacks() { ! grep -qF -- "$1" "$STUB_LOG"; }
+stdin_has() { grep -qxF -- "$1" "$STUB_STDIN"; }
 no_request() { [ ! -s "$STUB_LOG" ]; }
 rc_is() { [ "$RC" -eq "$1" ]; }
 
@@ -110,7 +118,10 @@ check "docs without topic omits the topic parameter" \
     arg_has "https://context7.com/api/v2/docs/code/prisma/prisma?type=txt"
 
 CONTEXT7_API_KEY="test-key" run docs /facebook/react hooks
-check "docs sends the API key as a bearer token when set" arg_has "Authorization: Bearer test-key"
+check "docs sends the API key as a bearer token on standard input" stdin_has "Authorization: Bearer test-key"
+check "docs reads the header from standard input" arg_has "@-"
+check "docs keeps the API key off curl's command line" arg_lacks "test-key"
+check "docs still sends the source header with a key" arg_has "X-Context7-Source: claude-skill"
 
 # --- search: request construction and output formatting ----------------------
 export STUB_BODY='{"results":[{"id":"/vercel/next.js","title":"Next.js","totalSnippets":42,"benchmarkScore":9.5,"description":"The React framework"}]}'
@@ -125,7 +136,8 @@ check "search prints the title" out_has "Name: Next.js"
 check "search prints snippets and score" out_has "Snippets: 42 | Score: 9.5"
 
 CONTEXT7_API_KEY="test-key" run search react
-check "search sends the API key as a bearer token when set" arg_has "Authorization: Bearer test-key"
+check "search sends the API key as a bearer token on standard input" stdin_has "Authorization: Bearer test-key"
+check "search keeps the API key off curl's command line" arg_lacks "test-key"
 
 export STUB_BODY='{"error":"rate limited"}'
 run search react

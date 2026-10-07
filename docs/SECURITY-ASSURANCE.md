@@ -18,7 +18,7 @@ The skill has no server component, stores nothing on disk, and handles no user a
 ## Security requirements
 
 1. `context7.sh` addresses every request to `https://context7.com/api/v2`.
-2. The optional `CONTEXT7_API_KEY` is read from the environment and sent only as an `Authorization` header to that host; without the variable no `Authorization` header is sent.
+2. The optional `CONTEXT7_API_KEY` is read from the environment and sent only as an `Authorization` header to that host; without the variable no `Authorization` header is sent. The key reaches `curl` on standard input, never as a command-line argument.
 3. Free-text arguments (search query, topic) cannot change the structure of the request URL.
 4. `context7.sh` writes no file and executes nothing it receives.
 5. Nothing committed to this repository contains a secret.
@@ -37,6 +37,7 @@ The skill has no server component, stores nothing on disk, and handles no user a
 | A search query or topic injects extra query parameters or path segments into the request | Both are percent-encoded with `jq @uri` before they are placed into the URL | `context7.sh` (`search_library`, `fetch_docs`); `tests/context7.sh` asserts `next.js app router` becomes `next.js%20app%20router` and `app router` becomes `app%20router` |
 | An arbitrary mode selects an unintended API path | `mode` must be `code` or `info`; anything else exits 1 before a request is made | `context7.sh` (`fetch_docs`); `tests/context7.sh` asserts exit 1 and no request for mode `html` |
 | The API key is sent to another host | The key is only added to requests whose URL starts with the constant `BASE_URL`; there is no option to change the host | `context7.sh`; `tests/context7.sh` asserts the header is present only when `CONTEXT7_API_KEY` is set |
+| Another local user reads the API key from the process list (CWE-214) | The header is written by `printf`, a shell builtin, into `curl`'s standard input and read with `-H @-`; the key is in no process's argument list | `context7.sh` (`api_get`); `tests/context7.sh` asserts the key is on `curl`'s standard input and absent from its arguments |
 | The response is executed (CWE-94, CWE-78) | The response is only printed or passed to `jq` as data; the script uses no `eval`, `source` or command built from response text | `context7.sh` |
 | A failing step continues with partial state | `context7.sh` runs with `set -e`; `Build/Scripts/check-plugin-version.sh` and `scripts/verify-harness.sh` with `set -euo pipefail` | the scripts named |
 | A release is tagged with a version that disagrees with `plugin.json` | The pre-push hook runs `check-plugin-version.sh`, which fails when a semver tag at `HEAD` differs from `.claude-plugin/plugin.json` | `Build/hooks/pre-push`, `Build/Scripts/check-plugin-version.sh`; `tests/check-plugin-version.sh` |
@@ -49,7 +50,7 @@ Which of these checks must pass before a pull request can merge is set in the br
 
 ## Secure design principles applied
 
-- **Economy of mechanism:** one Bash script with two commands and no dependencies beyond `curl` and `jq` (`context7.sh`).
+- **Economy of mechanism:** one Bash script with two commands and no dependencies beyond `curl` (7.55 or later, for `-H @-`) and `jq` (`context7.sh`).
 - **Fail-safe defaults:** invalid or missing arguments exit 1 before any request is made; without an API key the script works anonymously rather than prompting for one.
 - **Allowlist over escaping:** `mode` is checked against the two valid values instead of being encoded.
 - **Minimal attack surface:** no network listener, no files written, no state kept between runs.
